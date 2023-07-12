@@ -56,7 +56,14 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <ul id="messages">
+      <li>
+        commands :
+        <ul>
+          <li>ls</li>
+        </ul>
+      </li>
+    </ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" autofocus /><button>Send</button>
     </form>
@@ -81,11 +88,20 @@
         window.scrollTo(0, document.body.scrollHeight);
       });
 
+      socket.on("fsld", function (msg) {
+        var item = document.createElement("li");
+        item.textContent = JSON.stringify(msg, null, 2);
+       /*  console.log(item.textContent); */
+        messages.appendChild(item);
+        item.style.backgroundColor = "lightgreen";
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
       socket.on("atcher", function (msg) {
         var item = document.createElement("li");
-        item.textContent = JSON.stringify(msg)
-        messages.appendChild(item)
-        item.style.backgroundColor = "lightblue"
+        item.textContent = JSON.stringify(msg, null, 2);
+        messages.appendChild(item);
+        item.style.backgroundColor = "lightblue";
         window.scrollTo(0, document.body.scrollHeight);
       });
     </script>
