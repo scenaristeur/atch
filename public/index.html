@@ -80,7 +80,13 @@
       </li>
     </ul>
     <form id="form" action="">
-      <input id="input" autocomplete="off" autofocus /><button>Send</button>
+      <input
+        id="input"
+        autocomplete="off"
+        autofocus
+        type="text"
+        tabindex="-1"
+      /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -130,6 +136,15 @@
         input.focus();
       });
 
+      // prevent tab loose focus
+      input.addEventListener("keydown", function (e) {
+        console.log(e.keyCode);
+        if (e.keyCode == 9) {
+          input.focus();
+          e.preventDefault();
+        }
+      });
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (input.value) {
@@ -143,7 +158,8 @@
 
       socket.on("action", function (msg) {
         var item = document.createElement("li");
-        item.textContent = msg;
+        item.textContent = JSON.stringify(msg, null, 2);
+        item.style.backgroundColor = msg.action != undefined ? "yellow" : "";
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });

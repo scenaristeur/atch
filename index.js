@@ -37,19 +37,23 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   log(info(socket.id, " connected"));
   socket.workspace = workspace;
+  fsld.ls({ socket, args: [] });
   // socket.broadcast.emit("hi");
 
   socket.on("action", (msg) => {
     msg = msg.trim();
     let msg_split = msg.split(" ");
     log(warn("### action: " + msg));
+    let new_msg = { msg: msg, author: socket.id };
     if (
       fsld[msg_split[0]] != undefined &&
       typeof fsld[msg_split[0]] == "function"
     ) {
       fsld[msg_split[0]]({ socket: socket, args: msg_split.slice(1) });
+      new_msg.action = msg_split[0];
     }
-    io.emit("action", msg);
+
+    io.emit("action", new_msg);
   });
 
   socket.on("disconnect", () => {

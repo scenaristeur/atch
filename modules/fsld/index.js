@@ -13,15 +13,44 @@ export class Fsld {
     this.rename = this.move = this.mv;
     this.ll = this.ls;
   }
-
+  // todo
   rm({ socket, args }) {
     console.log("rm", args);
-    socket.emit("fsld", { event: "rm", response: "not implemented yet" });
+    let app = this;
+    const __dirname = path.resolve();
+    let trash = path.join(__dirname, "trash");
+    args.forEach(function (file) {
+      let chemin = app.__chemin(socket, file);
+      let trash_path = trash + "/" + file;
+      console.log(trash_path);
+      let response = {};
+      fs.rename(chemin, trash_path, (err) => {
+        if (err) {
+          console.log(err);
+          response[file] = err;
+          socket.emit("fsld", { event: "rm", file: file, error: err });
+          return;
+        } else {
+          socket.emit("fsld", { event: "rm", file: file, response: "removed" });
+        }
+      });
+    });
   }
   mv({ socket, args }) {
     console.log("mv", args);
     socket.emit("fsld", { event: "mv", response: "not implemented yet" });
   }
+
+  edit({ socket, args }) {
+    console.log("edit", args);
+    socket.emit("fsld", { event: "edit", response: "not implemented yet" });
+  }
+
+  who({ socket, args }) {
+    console.log("who", args);
+    socket.emit("fsld", { event: "who", response: "not implemented yet" });
+  }
+  ////////////////////// done
   cat({ socket, args }) {
     console.log("cat", args);
     let app = this;
@@ -41,19 +70,9 @@ export class Fsld {
       });
     });
   }
-  edit({ socket, args }) {
-    console.log("edit", args);
-    socket.emit("fsld", { event: "edit", response: "not implemented yet" });
-  }
-
-  who({ socket, args }) {
-    console.log("who", args);
-    socket.emit("fsld", { event: "who", response: "not implemented yet" });
-  }
-  //////////////////////
 
   touch({ socket, args }) {
-    let app = this
+    let app = this;
     console.log("touch", args);
     console.log(socket.workspace);
     let response = {};
@@ -71,7 +90,7 @@ export class Fsld {
     });
   }
   mkdir({ socket, args }) {
-    let app = this
+    let app = this;
     console.log("mkdir", args);
     console.log(socket.workspace);
     let response = {};
@@ -90,9 +109,7 @@ export class Fsld {
   cd({ socket, args }) {
     console.log("cd", args);
     let chemin =
-      args[0] == undefined
-        ? this.workspace
-        : this.__chemin(socket, args[0]);
+      args[0] == undefined ? this.workspace : this.__chemin(socket, args[0]);
     console.log("chemin now", chemin);
     socket.workspace = chemin;
   }
@@ -114,12 +131,10 @@ export class Fsld {
     console.log("ls", args);
     console.log("socket workspace:", socket.workspace);
     let chemin =
-      args[0] != undefined
-        ? this.__chemin(socket, args[0])
-        : socket.workspace;
+      args[0] != undefined ? this.__chemin(socket, args[0]) : socket.workspace;
     console.log("chemin:", chemin);
 
-    fs.readdir(chemin, (err, files) => { 
+    fs.readdir(chemin, (err, files) => {
       let response = { folders: [], files: [] };
       files != undefined &&
         files.forEach((file) => {
@@ -136,13 +151,13 @@ export class Fsld {
       socket.emit("fsld", { event: "ls", response: response });
     });
   }
- 
+
   __chemin(socket, args) {
     const __dirname = path.resolve();
     console.log("dirname", __dirname);
     console.log("socket_workspace", socket.workspace);
     console.log("args", args);
- 
+
     let chemin = path.join(socket.workspace, args);
     console.log("chemiin", chemin);
     if (!chemin.startsWith(this.workspace)) {
