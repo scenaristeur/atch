@@ -7,21 +7,21 @@ export class Atcher {
     this.init();
   }
   init() {
-    const watcher = new Watcher("workspace", { recursive: true });
+    const watcher = new Watcher(this.options.workspace, { recursive: true });
 
     watcher.on("error", (error) => {
       console.log(error instanceof Error); // => true, "Error" instances are always provided on "error"
     });
     watcher.on("ready", () => {
-      console.log("### ATCHER ready")
+      console.log("### ATCHER ready");
       // The app just finished instantiation and may soon emit some events
     });
     watcher.on("close", () => {
-      console.log("### ATCHER closed")
+      console.log("### ATCHER closed");
       // The app just stopped watching and will not emit any further events
     });
     watcher.on("all", (event, targetPath, targetPathNext) => {
-      this.options.io.emit('atcher', {event, targetPath, targetPathNext});
+      this.options.io.emit("atcher", { event, targetPath, targetPathNext });
       console.log(event); // => could be any target event: 'add', 'addDir', 'change', 'rename', 'renameDir', 'unlink' or 'unlinkDir'
       console.log(targetPath); // => the file system path where the event took place, this is always provided
       console.log(targetPathNext); // => the file system path "targetPath" got renamed to, this is only provided on 'rename'/'renameDir' events

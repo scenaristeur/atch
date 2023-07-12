@@ -5,6 +5,8 @@ import path from "path";
 import chalk from "chalk";
 import open from "open";
 
+const workspace = "workspace";
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -25,7 +27,7 @@ const ok = chalk.green;
 import { Atcher } from "./modules/atcher/index.js";
 import { Fsld } from "./modules/fsld/index.js";
 
-let atcher = new Atcher({ io: io });
+let atcher = new Atcher({ io: io, workspace: workspace });
 let fsld = new Fsld({ io: io });
 
 app.get("/", (req, res) => {
@@ -33,7 +35,8 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  log(info("a user connected"));
+  log(info(socket.id, " connected"));
+  socket.workspace = workspace;
   // socket.broadcast.emit("hi");
 
   socket.on("action", (msg) => {
@@ -50,7 +53,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    log(info("user disconnected"));
+    log(info(socket.id, "disconnected"));
   });
 });
 
