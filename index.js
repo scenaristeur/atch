@@ -28,7 +28,7 @@ import { Atcher } from "./modules/atcher/index.js";
 import { Fsld } from "./modules/fsld/index.js";
 
 let atcher = new Atcher({ io: io, workspace: workspace });
-let fsld = new Fsld({ io: io });
+let fsld = new Fsld({ io: io, workspace: workspace });
 
 app.get("/", (req, res) => {
   res.sendFile("public/index.html", { root: __dirname });

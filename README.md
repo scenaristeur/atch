@@ -1,4 +1,5 @@
 # atch
+!!! not secure, todo :  must block user to go up workspace and do what they want on system
 
 ## run 
 `node .`

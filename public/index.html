@@ -66,10 +66,16 @@
             touch file [file2 path/to/file3] : create new file(s) if not already
             exists.
           </li>
-          <li>mkdir folder1 [folder2 path/to/folder3] : create new folders if not already exists.</li>
+          <li>
+            mkdir folder1 [folder2 path/to/folder3] : create new folders if not
+            already exists.
+          </li>
+          <li>pwd : in which folder i am</li>
           <li></li>
           <li>UP and DOWN arrows : history navigation.</li>
           <li>click on line to select.</li>
+          <li></li>
+          <li>WIP : rm, mv/move/rename, cat, edit/vi, who</li>
         </ul>
       </li>
     </ul>
@@ -121,7 +127,7 @@
       messages.addEventListener("click", function (e) {
         console.log(e.target);
         input.value = e.target.textContent;
-        input.focus()
+        input.focus();
       });
 
       form.addEventListener("submit", function (e) {

@@ -6,17 +6,59 @@ export class Fsld {
   constructor(options = {}) {
     this.options = options;
     this.io = options.io;
+    this.workspace = options.workspace;
     //console.log(this.options)
     console.log("### FSLD ready");
     // aliases
+    this.rename = this.move = this.mv;
     this.ll = this.ls;
   }
+
+  rm({ socket, args }) {
+    console.log("rm", args);
+    socket.emit("fsld", { event: "rm", response: "not implemented yet" });
+  }
+  mv({ socket, args }) {
+    console.log("mv", args);
+    socket.emit("fsld", { event: "mv", response: "not implemented yet" });
+  }
+  cat({ socket, args }) {
+    console.log("cat", args);
+    let app = this;
+    console.log(socket.workspace);
+    let response = {};
+    args.forEach(function (file) {
+      let chemin = app.__chemin(socket, file);
+      fs.readFile(chemin, "utf8", (err, data) => {
+        if (err) {
+          console.log(err);
+          response[file] = err;
+          socket.emit("fsld", { event: "cat", file: file, error: err });
+          return;
+        } else {
+          socket.emit("fsld", { event: "cat", file: file, response: data });
+        }
+      });
+    });
+  }
+  edit({ socket, args }) {
+    console.log("edit", args);
+    socket.emit("fsld", { event: "edit", response: "not implemented yet" });
+  }
+
+  who({ socket, args }) {
+    console.log("who", args);
+    socket.emit("fsld", { event: "who", response: "not implemented yet" });
+  }
+  //////////////////////
+
   touch({ socket, args }) {
+    let app = this
     console.log("touch", args);
     console.log(socket.workspace);
     let response = {};
     args.forEach(function (file) {
-      let chemin = path.join(socket.workspace, file);
+      let chemin = app.__chemin(socket, file);
       let data = JSON.stringify({ "@id": uuidv4(), "@type": "file" });
 
       fs.writeFile(chemin, data, { flag: "wx" }, function (err) {
@@ -29,11 +71,12 @@ export class Fsld {
     });
   }
   mkdir({ socket, args }) {
+    let app = this
     console.log("mkdir", args);
     console.log(socket.workspace);
     let response = {};
     args.forEach(function (file) {
-      let chemin = path.join(socket.workspace, file);
+      let chemin = app.__chemin(socket, file);
 
       fs.mkdir(chemin, { recursive: true }, function (err) {
         if (err) {
@@ -46,24 +89,24 @@ export class Fsld {
   }
   cd({ socket, args }) {
     console.log("cd", args);
+    let chemin =
+      args[0] == undefined
+        ? this.workspace
+        : this.__chemin(socket, args[0]);
+    console.log("chemin now", chemin);
+    socket.workspace = chemin;
   }
-  rm({ socket, args }) {
-    console.log("rm", args);
-  }
-  move({ socket, args }) {
-    console.log("move", args);
-  }
-  cat({ socket, args }) {
-    console.log("cat", args);
-  }
-  edit({ socket, args }) {
-    console.log("edit", args);
+  pwd({ socket }) {
+    console.log("pwd");
+    socket.emit("fsld", { event: "pwd", response: socket.workspace });
   }
   help({ socket, args }) {
     console.log("help", args);
     let response = Object.getOwnPropertyNames(Fsld.prototype).filter(
       (item) =>
-        item != "constructor" && typeof Fsld.prototype[item] === "function"
+        item != "constructor" &&
+        !item.startsWith("_") &&
+        typeof Fsld.prototype[item] === "function"
     );
     socket.emit("fsld", { event: "help", response: response });
   }
@@ -72,11 +115,11 @@ export class Fsld {
     console.log("socket workspace:", socket.workspace);
     let chemin =
       args[0] != undefined
-        ? path.join(socket.workspace, args[0])
+        ? this.__chemin(socket, args[0])
         : socket.workspace;
     console.log("chemin:", chemin);
 
-    fs.readdir(chemin, (err, files) => {
+    fs.readdir(chemin, (err, files) => { 
       let response = { folders: [], files: [] };
       files != undefined &&
         files.forEach((file) => {
@@ -92,5 +135,21 @@ export class Fsld {
 
       socket.emit("fsld", { event: "ls", response: response });
     });
+  }
+ 
+  __chemin(socket, args) {
+    const __dirname = path.resolve();
+    console.log("dirname", __dirname);
+    console.log("socket_workspace", socket.workspace);
+    console.log("args", args);
+ 
+    let chemin = path.join(socket.workspace, args);
+    console.log("chemiin", chemin);
+    if (!chemin.startsWith(this.workspace)) {
+      chemin = this.workspace;
+      socket.emit("fsld", { error: "out of workspace", args: args });
+    }
+
+    return chemin;
   }
 }
