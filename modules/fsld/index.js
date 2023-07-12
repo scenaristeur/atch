@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export class Fsld {
   constructor(options = {}) {
@@ -11,15 +11,15 @@ export class Fsld {
     // aliases
     this.ll = this.ls;
   }
-  async touch({ socket, args }) {
+  touch({ socket, args }) {
     console.log("touch", args);
     console.log(socket.workspace);
     let response = {};
-    await args.forEach(async function (file) {
+    args.forEach(function (file) {
       let chemin = path.join(socket.workspace, file);
-      let data = JSON.stringify({ "@id": uuidv4() });
+      let data = JSON.stringify({ "@id": uuidv4(), "@type": "file" });
 
-      await fs.writeFile(chemin, data, { flag: "wx" }, function (err) {
+      fs.writeFile(chemin, data, { flag: "wx" }, function (err) {
         if (err) {
           console.log(err);
           response[file] = err;
@@ -30,6 +30,19 @@ export class Fsld {
   }
   mkdir({ socket, args }) {
     console.log("mkdir", args);
+    console.log(socket.workspace);
+    let response = {};
+    args.forEach(function (file) {
+      let chemin = path.join(socket.workspace, file);
+
+      fs.mkdir(chemin, { recursive: true }, function (err) {
+        if (err) {
+          console.log(err);
+          response[file] = err;
+          socket.emit("fsld", { event: "mkdir", file: file, error: err });
+        }
+      });
+    });
   }
   cd({ socket, args }) {
     console.log("cd", args);
