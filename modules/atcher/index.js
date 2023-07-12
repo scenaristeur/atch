@@ -3,6 +3,7 @@ import Watcher from "watcher";
 export class Atcher {
   constructor(options = {}) {
     this.options = options;
+    //console.log(this.options)
     this.init();
   }
   init() {
