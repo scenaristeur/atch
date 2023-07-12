@@ -68,6 +68,7 @@
           </li>
           <li></li>
           <li>UP and DOWN arrows : history navigation</li>
+          <li>click on line to select</li>
         </ul>
       </li>
     </ul>
@@ -81,6 +82,7 @@
       let history_index = 0;
       var form = document.getElementById("form");
       var input = document.getElementById("input");
+      var messages = document.getElementById("messages");
 
       document.onkeydown = (e) => {
         e = e || window.event;
@@ -114,6 +116,12 @@
           console.log("right arrow pressed");
         }
       };
+
+      messages.addEventListener("click", function (e) {
+        console.log(e.target);
+        input.value = e.target.textContent;
+        input.focus()
+      });
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
