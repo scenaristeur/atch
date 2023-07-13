@@ -12,9 +12,9 @@ const __dirname = path.resolve();
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  // for remote acces ?
   cors: {
-    origins: ["*"],
+    origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -39,7 +39,7 @@ io.on("connection", (socket) => {
   socket.workspace = workspace;
   fsld.ls({ socket, args: [] });
   // socket.broadcast.emit("hi");
-
+ 
   socket.on("action", (data) => {
     console.log(data);
     let msg = data.cmd.trim();
@@ -47,16 +47,14 @@ io.on("connection", (socket) => {
     if (data.cmd == "save") {
       fsld.__save({ socket, args: data });
     } else {
-     
       let msg_split = msg.split(" ");
       log(warn("### action: " + msg));
-  
-      if (
-        fsld[msg_split[0]] != undefined &&
-        typeof fsld[msg_split[0]] == "function"
-      ) {
-        fsld[msg_split[0]]({ socket: socket, args: msg_split.slice(1) });
-        new_msg.action = msg_split[0];
+      let low = msg_split[0].toLowerCase(); // first letter uppercase on mobile
+      console.log(low)
+      console.log(low)
+      if (fsld[low] != undefined && typeof fsld[low] == "function") {
+        fsld[low]({ socket: socket, args: msg_split.slice(1) });
+        new_msg.action = low;
       }
     }
 
