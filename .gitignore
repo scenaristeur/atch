@@ -1,4 +1,4 @@
 
-workspace/*
-trash/*
+_workspace/*
+_trash/*
 node_modules

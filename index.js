@@ -5,7 +5,7 @@ import path from "path";
 import chalk from "chalk";
 import open from "open";
 
-const workspace = "workspace";
+const workspace = "_workspace";
 
 const __dirname = path.resolve();
 

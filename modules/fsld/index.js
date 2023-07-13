@@ -14,28 +14,7 @@ export class Fsld {
     this.ll = this.ls;
   }
   // todo
-  rm({ socket, args }) {
-    console.log("rm", args);
-    let app = this;
-    const __dirname = path.resolve();
-    let trash = path.join(__dirname, "trash");
-    args.forEach(function (file) {
-      let chemin = app.__chemin(socket, file);
-      let trash_path = trash + "/" + file;
-      console.log(trash_path);
-      let response = {};
-      fs.rename(chemin, trash_path, (err) => {
-        if (err) {
-          console.log(err);
-          response[file] = err;
-          socket.emit("fsld", { event: "rm", file: file, error: err });
-          return;
-        } else {
-          socket.emit("fsld", { event: "rm", file: file, response: "removed" });
-        }
-      });
-    });
-  }
+ 
   mv({ socket, args }) {
     console.log("mv", args);
     socket.emit("fsld", { event: "mv", response: "not implemented yet" });
@@ -71,6 +50,38 @@ export class Fsld {
     });
   }
 
+  rm({ socket, args }) {
+    console.log("rm", args);
+    let app = this;
+    const __dirname = path.resolve();
+    let trash = path.join(__dirname, "_trash");
+    args.forEach(function (file) {
+      let chemin = app.__chemin(socket, file);
+      console.log("chemin from", chemin);
+      let trash_path = trash + "/" + file;
+      console.log(trash_path);
+      let response = {};
+      if (trash_path.includes("..") || chemin.includes("..")) {
+        let err = "can not remove outside workspace";
+        socket.emit("fsld", { event: "rm", file: file, error: err });
+      } else {
+        fs.rename(chemin, trash_path, (err) => {
+          if (err) {
+            console.log(err);
+            response[file] = err;
+            socket.emit("fsld", { event: "rm", file: file, error: err });
+            return;
+          } else {
+            socket.emit("fsld", {
+              event: "rm",
+              file: file,
+              response: "removed",
+            });
+          }
+        });
+      }
+    });
+  }
   touch({ socket, args }) {
     let app = this;
     console.log("touch", args);
