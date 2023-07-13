@@ -7,7 +7,11 @@
 ## dev
 `npm run dev`
 
-watch change in workspace directory
+watch change in _workspace directory
+
+if not exist, you must create
+
+_workspace and _trash folders
 
 
 

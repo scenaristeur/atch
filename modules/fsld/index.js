@@ -12,10 +12,10 @@ export class Fsld {
     // aliases
     this.rename = this.move = this.mv;
     this.ll = this.ls;
-    this.edit = this.vi
+    this.edit = this.vi;
   }
   // todo
- 
+
   mv({ socket, args }) {
     console.log("mv", args);
     socket.emit("fsld", { event: "mv", response: "not implemented yet" });
@@ -23,12 +23,54 @@ export class Fsld {
 
   vi({ socket, args }) {
     console.log("vi", args);
-    socket.emit("fsld", { event: "vi", response: "not implemented yet" });
+    let app = this;
+    console.log(socket.workspace);
+    let response = {};
+    args.forEach(function (file) {
+      let chemin = app.__chemin(socket, file);
+      fs.readFile(chemin, "utf8", (err, data) => {
+        if (err) {
+          console.log(err);
+          response[file] = err;
+          socket.emit("fsld", {
+            event: "vi",
+            file: file,
+            error: err,
+            path: chemin,
+          });
+          return;
+        } else {
+          socket.emit("fsld", {
+            event: "vi",
+            file: file,
+            response: data,
+            path: chemin,
+          });
+        }
+      });
+    });
   }
 
   who({ socket, args }) {
     console.log("who", args);
     socket.emit("fsld", { event: "who", response: "not implemented yet" });
+  }
+  __save({ socket, args }) {
+    console.log("save", args);
+    let chemin = args.data.msg.path;
+    let data = JSON.parse(args.data.msg.response);
+    console.log(data);
+    data.content = args.data.content;
+    fs.writeFile(chemin, JSON.stringify(data), function (err) {
+      if (err) {
+        console.log(err);
+        response[file] = err;
+        socket.emit("fsld", { event: "save", file: file, error: err });
+        return;
+      } else {
+        socket.emit("fsld", { event: "saved", response: chemin });
+      }
+    });
   }
   ////////////////////// done
   cat({ socket, args }) {

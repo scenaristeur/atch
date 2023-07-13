@@ -53,6 +53,25 @@
       #messages > li:nth-child(odd) {
         background: #efefef;
       }
+      .editors {
+        display: flex;
+        flex-direction: row;
+        font-size: 30px;
+        color: green;
+        border: 4px dashed green;
+        padding: 5px;
+        overflow-x: auto;
+        white-space: nowrap;
+        /*width: 400px;*/
+      }
+
+      .editors div {
+        display: flex;
+        border: 2px solid red;
+        margin: 10px 20px;
+        flex-direction: column;
+        /*width: 100px;*/
+      }
     </style>
   </head>
   <body>
@@ -70,7 +89,10 @@
             mkdir folder1 [folder2 path/to/folder3] : create new folders if not
             already exists.
           </li>
-          <li>rm file [ file2 path/to/file3 folder4] : move file or folder to the _trash </li>
+          <li>
+            rm file [ file2 path/to/file3 folder4] : move file or folder to the
+            _trash
+          </li>
           <li>pwd : in which folder i am</li>
           <li></li>
           <li>UP and DOWN arrows : history navigation.</li>
@@ -80,6 +102,7 @@
         </ul>
       </li>
     </ul>
+    <div id="editors" class="editors"></div>
     <form id="form" action="">
       <input
         id="input"
@@ -97,6 +120,7 @@
       var form = document.getElementById("form");
       var input = document.getElementById("input");
       var messages = document.getElementById("messages");
+      let editors = document.getElementById("editors");
 
       document.onkeydown = (e) => {
         e = e || window.event;
@@ -150,7 +174,7 @@
         e.preventDefault();
         if (input.value) {
           let cmd = input.value.trim();
-          socket.emit("action", cmd);
+          socket.emit("action", { cmd });
           history.push(cmd);
           input.value = "";
           history_index = 0;
@@ -167,11 +191,49 @@
 
       socket.on("fsld", function (msg) {
         var item = document.createElement("li");
-        item.textContent = JSON.stringify(msg, null, 2);
+        item.textContent = JSON.stringify(msg);
         /*  console.log(item.textContent); */
         messages.appendChild(item);
         item.style.backgroundColor =
           msg.error == undefined ? "lightgreen" : "pink";
+        if (msg.error == undefined && msg.event == "vi") {
+          let id = JSON.parse(msg.response)["@id"];
+          let div = document.createElement("div");
+          let label = document.createElement("label");
+          label.innerHTML = msg.file + " / " + id;
+          div.appendChild(label);
+
+          let textarea = document.createElement("textarea");
+          textarea.id = "t-" + id;
+          textarea.rows = 20;
+          textarea.cols = 40;
+          textarea.innerText = JSON.parse(msg.response)["content"] || "";
+          div.id = id;
+          div.appendChild(textarea);
+          let save_btn = document.createElement("button");
+          save_btn.textContent = "S";
+          save_btn.title = "save";
+          div.appendChild(save_btn);
+          let close_btn = document.createElement("button");
+          close_btn.textContent = "X";
+          close_btn.title = "close";
+          div.appendChild(close_btn);
+          editors.appendChild(div);
+
+          save_btn.addEventListener("click", function (e) {
+            console.log("save", div.id);
+            let content = document.getElementById("t-" + id).value;
+            console.log("content", content);
+            let data = { msg: msg, content: content };
+            socket.emit("action", { cmd: "save", data: data });
+          });
+
+          close_btn.addEventListener("click", function (e) {
+            console.log("close", div.id);
+            const element = document.getElementById(div.id);
+            element.remove();
+          });
+        }
         window.scrollTo(0, document.body.scrollHeight);
       });
 

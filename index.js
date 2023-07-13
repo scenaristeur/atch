@@ -40,17 +40,24 @@ io.on("connection", (socket) => {
   fsld.ls({ socket, args: [] });
   // socket.broadcast.emit("hi");
 
-  socket.on("action", (msg) => {
-    msg = msg.trim();
-    let msg_split = msg.split(" ");
-    log(warn("### action: " + msg));
+  socket.on("action", (data) => {
+    console.log(data);
+    let msg = data.cmd.trim();
     let new_msg = { msg: msg, author: socket.id };
-    if (
-      fsld[msg_split[0]] != undefined &&
-      typeof fsld[msg_split[0]] == "function"
-    ) {
-      fsld[msg_split[0]]({ socket: socket, args: msg_split.slice(1) });
-      new_msg.action = msg_split[0];
+    if (data.cmd == "save") {
+      fsld.__save({ socket, args: data });
+    } else {
+     
+      let msg_split = msg.split(" ");
+      log(warn("### action: " + msg));
+  
+      if (
+        fsld[msg_split[0]] != undefined &&
+        typeof fsld[msg_split[0]] == "function"
+      ) {
+        fsld[msg_split[0]]({ socket: socket, args: msg_split.slice(1) });
+        new_msg.action = msg_split[0];
+      }
     }
 
     io.emit("action", new_msg);
