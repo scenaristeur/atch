@@ -12,6 +12,7 @@ export class Fsld {
     // aliases
     this.rename = this.move = this.mv;
     this.ll = this.ls;
+    this.edit = this.vi
   }
   // todo
  
@@ -20,9 +21,9 @@ export class Fsld {
     socket.emit("fsld", { event: "mv", response: "not implemented yet" });
   }
 
-  edit({ socket, args }) {
-    console.log("edit", args);
-    socket.emit("fsld", { event: "edit", response: "not implemented yet" });
+  vi({ socket, args }) {
+    console.log("vi", args);
+    socket.emit("fsld", { event: "vi", response: "not implemented yet" });
   }
 
   who({ socket, args }) {
